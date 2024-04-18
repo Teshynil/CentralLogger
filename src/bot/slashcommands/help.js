@@ -18,11 +18,7 @@ module.exports = {
           fields: [{
             inline: true,
             name: 'Open Source',
-            value: 'See https://github.com/tizzysaurus/logger for current code.'
-          }, {
-            inline: true,
-            name: 'Dashboard',
-            value: 'There are currently no plans for a dashboard, as I don\'t have a website to host it on.'
+            value: 'Using the source code from https://github.com/tizzysaurus/logger'
           }, {
             inline: false,
             name: 'Privacy Policy',

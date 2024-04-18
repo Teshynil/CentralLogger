@@ -39,11 +39,10 @@ module.exports = {
 async function paste (messages, guildID) {
   if (!messages || messages.length === 0) return
   const messageDeleteBulkEvent = {
-    guildID: guildID,
+    guildID,
     eventName: 'messageDeleteBulk',
     embeds: [{
-      description: `**${messages.length}** message(s) were deleted and known in cache.`,
-      fields: [],
+      description: `**${messages.length}** message(s) were deleted and known in cache`,
       color: 15550861
     }]
   }
@@ -58,7 +57,7 @@ async function paste (messages, guildID) {
     }
     return `${displayUsername(globalUser)} (${m.author_id}) | (${globalUser.avatarURL}) | ${new Date(m.ts).toUTCString()}: ${m.content}`
   }).join('\r\n')
-  if (pasteString) {
+  if (process.env.PASTE_CREATE_ENDPOINT !== '') {
     sa
       .post(`${process.env.PASTE_SITE_ROOT_URL.endsWith("/") ? process.env.PASTE_SITE_ROOT_URL.slice(0, -1) : process.env.PASTE_SITE_ROOT_URL}/documents`)
       .set('Authorization', process.env.PASTE_SITE_TOKEN ?? '')
@@ -72,9 +71,16 @@ async function paste (messages, guildID) {
           })
           send(messageDeleteBulkEvent)
         } else {
-          global.logger.error(err)
-          global.webhook.error('An error has occurred while posting to the paste website. Check logs for more.')
+          global.logger.error(err, res.body)
+          await send(messageDeleteBulkEvent)
         }
       })
+  } else {
+    // having trouble with eris's implementation of executeWebhook
+    // messageDeleteBulkEvent.file = {
+    //   name: 'messageDeleteBulk.txt',
+    //   file: Buffer.from(pasteString ?? 'no content')
+    // }
+    await send(messageDeleteBulkEvent)
   }
 }

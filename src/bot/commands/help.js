@@ -55,13 +55,13 @@ module.exports = {
             fields: [{
               inline: true,
               name: 'Open Source',
-              value: 'See https://github.com/tizzysaurus/logger for current code.'
-            }, {
-              inline: true,
-              name: 'Dashboard',
-              value: 'There are currently no plans for a dashboard, as I don\'t have a website to host it on.'
-            }, {
-              inline: false,
+              value: 'Using the source code from https://github.com/tizzysaurus/logger'
+            },
+            {
+              name: 'Support',
+              value: 'If something is going horribly wrong, go ahead and join [my support server](https://discord.gg/ed7Gaa3)'
+            },
+            {
               name: 'Privacy Policy',
               value: `Please contact \`@${process.env.BOT_CREATOR_NAME}\` for privacy information`
             }, {
