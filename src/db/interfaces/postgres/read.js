@@ -42,11 +42,13 @@ async function decryptUserDoc (userDoc) {
 
 async function decryptMessageDoc (message) {
   message.content = aes.decrypt(message.content)
-  if (message.attachment_b64) message.attachment_b64 = aes.decrypt(message.attachment_b64)
+  if (message.attachment_b64) message.attachment_b64 = message.attachment_b64.split("|").map(encrypted_img_url => aes.decrypt(encrypted_img_url)).join("|")
   return message
 }
 
 async function getMessagesByIds (messageIds) {
+  if (messageIds.length === 0) return []
+
   const message = await pool.query('SELECT * FROM messages WHERE id = ANY ($1)', [messageIds])
   if (message.rows.length === 0) return null
   const decryptedMessages = []

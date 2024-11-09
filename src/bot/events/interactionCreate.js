@@ -1,8 +1,8 @@
 const fs = require('fs')
 const path = require('path')
 const Eris = require('eris')
-const { EMBED_COLORS } = require('../utils/constants')
-const { getEmbedFooter, getAuthorField } = require('../utils/embeds')
+const { EMBED_COLORS, displayUsername } = require('../utils/constants')
+const { buildEmbedFooterField, buildEmbedAuthorField } = require('../utils/embeds')
 const { NewsThreadChannel, PrivateThreadChannel, PublicThreadChannel } = require('eris')
 
 let slashCommands = fs.readdirSync(path.resolve('src', 'bot', 'slashcommands')).map(filename => {
@@ -32,7 +32,7 @@ module.exports = {
       } else if (interaction instanceof Eris.CommandInteraction) {
         const channel = global.bot.getChannel(interaction.channel.id)
         if (!channel || channel instanceof Eris.VoiceChannel) return // no need to check send messages because replies are made using webhooks
-        if (interaction.data.name === 'reloadinteractions' && interaction.member.user.id === process.env.CREATOR_IDS) {
+        if (interaction.data.name === 'reloadinteractions' && process.env.CREATOR_IDS.split(",").includes(interaction.member.user.id)) {
           fs.readdirSync(path.resolve('src', 'bot', 'slashcommands')).forEach(filename => {
             delete require.cache[require.resolve(path.resolve('src', 'bot', 'slashcommands', filename))]
           })
@@ -44,7 +44,7 @@ module.exports = {
         }
         const command = slashCommands.find(c => c.name === interaction.data.name)
         if (command) {
-          if (command?.type === 'creator' && interaction.member.user.id !== process.env.CREATOR_IDS) {
+          if (command.type === 'creator' && !process.env.CREATOR_IDS.split(",").includes(interaction.member.user.id)) {
             return
           }
           if (command.noThread && (interaction.channel instanceof NewsThreadChannel || interaction.channel instanceof PrivateThreadChannel || interaction.channel instanceof PublicThreadChannel)) {
@@ -53,8 +53,8 @@ module.exports = {
                 title: 'Unable to run',
                 color: EMBED_COLORS.YELLOW_ORANGE,
                 description: `__${command.name}__ cannot be ran in a thread.`,
-                footer: getEmbedFooter(global.bot.user),
-                author: getAuthorField(interaction.member.user),
+                author: buildEmbedAuthorField(interaction.member.user),
+                footer: buildEmbedFooterField(global.bot.user),
                 thumbnail: {
                   url: interaction.member.user.dynamicAvatarURL(null, 64)
                 }
@@ -72,8 +72,8 @@ module.exports = {
                   title: 'Missing Permissions',
                   color: EMBED_COLORS.YELLOW_ORANGE,
                   description: `You are missing the following permissions to run ${command.name}: ${missingPermissions.map(perm => `\`${perm}\``).join(', ')}`,
-                  footer: getEmbedFooter(global.bot.user),
-                  author: getAuthorField(interaction.member.user),
+                  author: buildEmbedAuthorField(interaction.member.user),
+                  footer: buildEmbedFooterField(global.bot.user),
                   thumbnail: {
                     url: interaction.member.user.dynamicAvatarURL(null, 64)
                   }
@@ -92,8 +92,8 @@ module.exports = {
                   title: 'Bot Missing Permissions',
                   color: EMBED_COLORS.YELLOW_ORANGE,
                   description: `I need the following permissions to run ${command.name}: ${missingPermissions.map(perm => `\`${perm}\``).join(', ')}`,
-                  footer: getEmbedFooter(global.bot.user),
-                  author: getAuthorField(interaction.member.user),
+                  author: buildEmbedAuthorField(interaction.member.user),
+                  footer: buildEmbedFooterField(global.bot.user),
                   thumbnail: {
                     url: global.bot.user.dynamicAvatarURL(null, 64)
                   }
@@ -105,7 +105,7 @@ module.exports = {
           }
           const guild = global.bot.guilds.get(interaction.guildID)
           if (guild) {
-            global.logger.info(`${interaction.member.username}#${interaction.member.discriminator} (${interaction.member.id}) in ${interaction.channel.id} sent /${command.name}. The guild is called "${guild.name}", owned by ${guild.ownerID} and has ${guild.memberCount} members.`)
+            global.logger.info(`${displayUsername(interaction.member)} (${interaction.member.id}) in ${interaction.channel.id} sent /${command.name}. The guild is called "${guild.name}", owned by ${guild.ownerID} and has ${guild.memberCount} members.`)
             try {
               command.func(interaction)
             } catch (commandError) {

@@ -1,11 +1,15 @@
 const send = require('../modules/webhooksender')
 const prunecache = require('../modules/prunecache')
 const { User } = require('eris')
+const { displayUsername } = require('../utils/constants')
+const { buildEmbedAuthorField, buildEmbedFooterField } = require('../utils/embeds')
 
 module.exports = {
   name: 'guildMemberRemove',
   type: 'on',
   handle: async (guild, member) => {
+    const memberUsername = displayUsername(member)
+
     if (!member.roles) {
       member = new User({ id: member.id, ...member.user }, global.bot)
     }
@@ -31,24 +35,21 @@ module.exports = {
       log = logs.entries.find(e => e.targetID === member.id && (Date.now() - ((e.id / 4194304) + 1420070400000)) < 3000)
     }
     if (log && log.user) {
-      const user = log.user
-      if (!user) return // !!!! not good
+      const perp = log.user
+      if (!perp) return // !!!! not good
       event.eventName = 'guildMemberKick'
       event.embeds = [{
         author: {
-          name: `${member.username}#${member.discriminator} ${member.nick ? `(${member.nick})` : ''}`,
+          name: `${memberUsername} ${member.nick ? `(${member.nick})` : ''}`,
           icon_url: member.avatarURL
         },
         color: 16711680,
-        description: `${member.username}#${member.discriminator} ${member.nick ? `(${member.nick})` : ''} was kicked`,
+        description: `${memberUsername} ${member.nick ? `(${member.nick})` : ''} was kicked`,
         fields: [{
           name: 'User Information',
-          value: `${member.username}#${member.discriminator} (${member.id}) ${member.mention} ${member.bot ? '\nIs a bot' : ''}`
+          value: `${memberUsername} (${member.id}) ${member.mention} ${member.bot ? '\nIs a bot' : ''}`
         }],
-        footer: {
-          text: `${user.username}#${user.discriminator}`,
-          icon_url: user.avatarURL
-        }
+        footer: buildEmbedFooterField(perp)
       }]
       if (member.roles) {
         event.embeds[0].fields.push(rolesField, {
@@ -64,21 +65,18 @@ module.exports = {
         value: log.reason ? log.reason : 'None provided'
       }, {
         name: 'ID',
-        value: `\`\`\`ini\nUser = ${member.id}\nPerpetrator = ${user.id}\`\`\``
+        value: `\`\`\`ini\nUser = ${member.id}\nPerpetrator = ${perp.id}\`\`\``
       })
       return send(event)
     } else {
       // TODO: redo purge audit log stuff eventually (update: copy from patron bot eventually)
       event.embeds = [{
-        author: {
-          name: `${member.username}#${member.discriminator}`,
-          icon_url: member.avatarURL
-        },
+        author: buildEmbedAuthorField(member),
         color: 16711680,
-        description: `${member.username}#${member.discriminator} left the server`,
+        description: `${memberUsername} left the server`,
         fields: [{
           name: 'User Information',
-          value: `${member.username}#${member.discriminator} (${member.id}) ${member.mention} ${member.bot ? '\nIs a bot' : ''}`
+          value: `${memberUsername} (${member.id}) ${member.mention} ${member.bot ? '\nIs a bot' : ''}`
         }]
       }]
       if (member.roles) {

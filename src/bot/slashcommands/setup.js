@@ -2,7 +2,7 @@ const Eris = require('eris')
 const { v4: uuidv4 } = require('uuid')
 const { setEventsLogId } = require('../../db/interfaces/postgres/update')
 const { EMBED_COLORS, PRESET_EVENT_MAP, ALL_EVENTS } = require('../utils/constants')
-const { getEmbedFooter, getAuthorField } = require('../utils/embeds')
+const { buildEmbedAuthorField, buildEmbedFooterField } = require('../utils/embeds')
 
 async function returnMissingPerms (channelID, userID, events) {
   const requiredPerms = ['manageWebhooks', 'viewAuditLog', 'viewChannel', 'sendMessages', 'embedLinks', 'readMessageHistory', 'useExternalEmojis']
@@ -132,8 +132,8 @@ async function handlePresetSetup (interaction, recursionUUID) {
         },
         description: `I cannot update logging settings with new presets: I need the following permissions in this channel: ${missingPermissions.map(p => `**${p}**`).join(', ')}. Have questions? See \`/help usage: Guide\``,
         color: EMBED_COLORS.YELLOW_ORANGE,
-        footer: getEmbedFooter(global.bot.user),
-        author: getAuthorField(interaction.member.user)
+        author: buildEmbedAuthorField(interaction.member.user),
+        footer: buildEmbedFooterField(global.bot.user)
       }],
       flags: Eris.Constants.MessageFlags.EPHEMERAL
     })
@@ -418,8 +418,8 @@ async function handleIndividualSetup (interaction, recursionUUID) {
         },
         description: `I cannot update logging settings with new presets: I need the following permissions in this channel: ${missingPermissions.map(p => `**${p}**`).join(', ')}. Have questions? See \`/help usage: Guide\``,
         color: EMBED_COLORS.YELLOW_ORANGE,
-        footer: getEmbedFooter(global.bot.user),
-        author: getAuthorField(interaction.member.user)
+        author: buildEmbedAuthorField(interaction.member.user),
+        footer: buildEmbedFooterField(global.bot.user)
       }],
       flags: Eris.Constants.MessageFlags.EPHEMERAL
     })
@@ -447,7 +447,7 @@ async function handleListLogSetup (interaction) {
   interaction.createMessage({
     embeds: [{
       title: 'Logging Channels',
-      author: getAuthorField(interaction.member.user),
+      author: buildEmbedAuthorField(interaction.member.user),
       description: logLines.length !== 0 ? logLines.join('\n') : 'I am not logging any events to this server, see `/setup` or `/help` for setup help.',
       color: EMBED_COLORS.PURPLED_BLUE
     }],

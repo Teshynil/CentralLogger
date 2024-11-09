@@ -1,4 +1,5 @@
 const disableEvent = require('../../db/interfaces/postgres/update').disableEvent
+const { buildEmbedAuthorField, buildEmbedFooterField } = require('../utils/embeds')
 const eventList = require('../utils/constants').ALL_EVENTS
 
 module.exports = {
@@ -10,14 +11,8 @@ module.exports = {
           description: `The provided argument is invalid. Valid events: ${eventList.join(', ')}`,
           color: 16711680,
           timestamp: new Date(),
-          footer: {
-            icon_url: global.bot.user.avatarURL,
-            text: `${global.bot.user.username}#${global.bot.user.discriminator}`
-          },
-          author: {
-            name: `${message.author.username}#${message.author.discriminator}`,
-            icon_url: message.author.avatarURL
-          }
+          author: buildEmbedAuthorField(message.author),
+          footer: buildEmbedFooterField(global.bot.user)
         }]
       })
     }
@@ -28,19 +23,13 @@ module.exports = {
         description: respStr,
         color: 3553599,
         timestamp: new Date(),
-        footer: {
-          icon_url: global.bot.user.avatarURL,
-          text: `${global.bot.user.username}#${global.bot.user.discriminator}`
-        },
-        author: {
-          name: `${message.author.username}#${message.author.discriminator}`,
-          icon_url: message.author.avatarURL
-        }
+        author: buildEmbedAuthorField(message.author),
+        footer: buildEmbedFooterField(global.bot.user)
       }]
     })
   },
   name: 'togglemodule',
-  quickHelp: `[DEPRECATED]\nIgnore any event provided after this command. You should have no need for this command when you can stop an event from logging by using ${process.env.GLOBAL_BOT_PREFIX}stoplogging or by signing into [the dashboard](https://logger.bot).`,
+  quickHelp: `[DEPRECATED]\nIgnore any event provided after this command. You should have no need for this command when you can stop an event from logging by using ${process.env.GLOBAL_BOT_PREFIX}stoplogging.`,
   examples: 'Unneccesary, this command is deprecated.',
   type: 'custom',
   perm: 'manageChannels',

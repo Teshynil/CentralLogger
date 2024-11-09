@@ -1,9 +1,9 @@
 const chalk = require('chalk')
 const Sentry = require('@sentry/node')
 
-if (process.env.SENTRY_URI) {
+if (process.env.RAVEN_URI) {
   Sentry.init({
-    dsn: process.env.SENTRY_URI
+    dsn: process.env.RAVEN_URI
   })
 }
 

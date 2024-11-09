@@ -1,6 +1,6 @@
 const { toggleLogBots } = require('../../db/interfaces/postgres/update')
 const { EMBED_COLORS } = require('../utils/constants')
-const { getEmbedFooter, getAuthorField } = require('../utils/embeds')
+const { buildEmbedAuthorField, buildEmbedFooterField } = require('../utils/embeds')
 
 module.exports = {
   name: 'logbots',
@@ -16,8 +16,8 @@ module.exports = {
           thumbnail: {
             url: interaction.member.user.dynamicAvatarURL(null, 64)
           },
-          author: getAuthorField(interaction.member.user),
-          footer: getEmbedFooter(global.bot.user)
+          author: buildEmbedAuthorField(interaction.member.user),
+          footer: buildEmbedFooterField(global.bot.user)
         }]
       }).catch(() => {})
     } catch (e) {
@@ -30,8 +30,8 @@ module.exports = {
           thumbnail: {
             url: interaction.member.user.dynamicAvatarURL(null, 64)
           },
-          author: getAuthorField(interaction.member.user),
-          footer: getEmbedFooter(global.bot.user)
+          author: buildEmbedAuthorField(interaction.member.user),
+          footer: buildEmbedFooterField(global.bot.user)
         }]
       }).catch(() => {})
     }

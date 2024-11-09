@@ -1,4 +1,6 @@
 const send = require('../modules/webhooksender')
+const { displayUsername } = require('../utils/constants')
+
 const AUDIT_ID = {
   added: 60,
   removed: 62,
@@ -67,12 +69,12 @@ module.exports = {
       if (!logs) return
       const log = logs.entries.find(e => e?.targetID === emoji.id && Date.now() - ((e.id / 4194304) + 1420070400000) < 3000)
       if (log && log.user) { // if the audit log is less than 3 seconds off
-        const user = log.user
+        const perp = log.user
         guildEmojisUpdateEvent.embeds[0].author = {
-          name: `${user.username}#${user.discriminator}`,
-          icon_url: user.avatarURL
+          name: displayUsername(perp),
+          icon_url: perp.avatarURL
         }
-        guildEmojisUpdateEvent.embeds[0].fields[1].value = `\`\`\`ini\nUser = ${user.id}\nEmoji = ${emoji.id}\`\`\``
+        guildEmojisUpdateEvent.embeds[0].fields[1].value = `\`\`\`ini\nUser = ${perp.id}\nEmoji = ${emoji.id}\`\`\``
         await send(guildEmojisUpdateEvent)
       }
     }, 1000)

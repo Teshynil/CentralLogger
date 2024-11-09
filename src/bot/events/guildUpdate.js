@@ -1,5 +1,6 @@
 const escape = require('markdown-escape')
 const send = require('../modules/webhooksender')
+const { displayUsername } = require('../utils/constants')
 
 const checkExempt = [
   'afk_channel_id',
@@ -51,7 +52,7 @@ module.exports = {
         eventName: 'guildUpdate',
         embeds: [{
           author: {
-            name: `${user.username}#${user.discriminator} ${member && member.nick ? `(${member.nick})` : ''}`,
+            name: `${displayUsername(user)} ${member && member.nick ? `(${member.nick})` : ''}`,
             icon_url: user.avatarURL
           },
           description: 'The guild was updated',

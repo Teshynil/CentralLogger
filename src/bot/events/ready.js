@@ -1,6 +1,7 @@
 const cluster = require('cluster')
 const checkForMissingSettings = require('../utils/recoverSettings')
 const statAggregator = require('../modules/statAggregator')
+const { displayUsername } = require('../utils/constants')
 
 let failedHealthCheckCount = 0
 
@@ -17,6 +18,7 @@ module.exports = {
     if (global.bot.shards.find(s => s.id === 0)) { // only check for missing settings once
       await checkForMissingSettings()
     }
+    global.botUserUsername = displayUsername(global.bot.user)
     setInterval(() => {
       if (bot.shards.filter(shard => shard.latency == Infinity && shard.status === 'disconnected').length !== 0) {
         failedHealthCheckCount++

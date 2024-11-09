@@ -1,21 +1,22 @@
 const send = require('../modules/webhooksender')
+const { displayUsername } = require('../utils/constants')
+const { buildEmbedAuthorField, buildEmbedFooterField } = require('../utils/embeds')
 
 module.exports = {
   name: 'guildBanAdd',
   type: 'on',
   handle: async (guild, user) => {
+    const userUsername = displayUsername(user)
+
     const guildBanAddEvent = {
       guildID: guild.id,
       eventName: 'guildBanAdd',
       embeds: [{
-        author: {
-          name: `${user.username}#${user.discriminator} `,
-          icon_url: user.avatarURL
-        },
-        description: `${user.username}#${user.discriminator} was banned`,
+        author: buildEmbedAuthorField(user),
+        description: `${userUsername} was banned`,
         fields: [{
           name: 'User Information',
-          value: `${user.username}#${user.discriminator} (${user.id}) ${user.mention} ${user.bot ? '\nIs a bot' : ''}`
+          value: `${userUsername} (${user.id}) ${user.mention} ${user.bot ? '\nIs a bot' : ''}`
         }, {
           name: 'Reason',
           value: 'None provided'
@@ -28,9 +29,9 @@ module.exports = {
     }
     /*
      * Race condition time ladies and gentlemen:
-     * Why the 1 second wait from when the event is received vs fetching audit logs?
+     * Why the 5 second wait from when the event is received vs fetching audit logs?
      * The bot fetches audit logs for the ban entry, but Discord is behind on publishing it.
-     * The 1 second wait makes sure the bot gets the new entry on time.
+     * The 5 second wait makes sure the bot gets the new entry on time.
      * Thanks Discord.
     */
     const actionStartedTime = new Date()
@@ -49,10 +50,7 @@ module.exports = {
       const perp = log.user
       if (log.reason) guildBanAddEvent.embeds[0].fields[1].value = log.reason
       guildBanAddEvent.embeds[0].fields[2].value = `\`\`\`ini\nUser = ${user.id}\nPerpetrator = ${perp.id}\`\`\``
-      guildBanAddEvent.embeds[0].footer = {
-        text: `${perp.username}#${perp.discriminator}`,
-        icon_url: perp.avatarURL
-      }
+      guildBanAddEvent.embeds[0].footer = buildEmbedFooterField(perp)
       await send(guildBanAddEvent)
     }, 5000)
   }

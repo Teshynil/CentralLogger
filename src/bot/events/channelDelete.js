@@ -1,4 +1,6 @@
 const send = require('../modules/webhooksender')
+const { displayUsername } = require('../utils/constants')
+
 const CHANNEL_TYPE_MAP = {
   0: 'Text channel',
   2: 'Voice channel',
@@ -42,10 +44,10 @@ module.exports = {
     let lastCachedMessage = await global.redis.get(channel.lastMessageID)
     if (lastCachedMessage) {
       lastCachedMessage = JSON.parse(lastCachedMessage)
-      const user = global.bot.users.get(lastCachedMessage.userID)
+      const authorOfLastMessage = global.bot.users.get(lastCachedMessage.userID)
       channelDeleteEvent.embeds[0].fields.push({
         name: 'Last message',
-        value: `Author: **${user.username}#${user.discriminator}**\n${lastCachedMessage.content}`
+        value: `Author: **${displayUsername(authorOfLastMessage)}**\n${lastCachedMessage.content}`
       })
     }
     if (channel.permissionOverwrites.size !== 0) {
@@ -64,13 +66,13 @@ module.exports = {
     if (!logs) return
     const log = logs.entries.find(e => e.targetID === channel.id && Date.now() - ((e.id / 4194304) + 1420070400000) < 3000)
     if (log) { // if the audit log is less than 3 seconds off
-      const user = log.user
-      if (user && user?.bot && !global.bot.guildSettingsCache[channel.guild.id].isLogBots()) return
-      if (user) {
-        const member = channel.guild.members.get(user.id)
-        channelDeleteEvent.embeds[0].author.name = `${user.username}#${user.discriminator} ${member && member.nick ? `(${member.nick})` : ''}`
-        channelDeleteEvent.embeds[0].author.icon_url = user.avatarURL
-        channelDeleteEvent.embeds[0].fields[3].value = `\`\`\`ini\nUser = ${user.id}\nChannel = ${channel.id}\`\`\``
+      const perp = log.user
+      if (perp && perp?.bot && !global.bot.guildSettingsCache[channel.guild.id].isLogBots()) return
+      if (perp) {
+        const member = channel.guild.members.get(perp.id)
+        channelDeleteEvent.embeds[0].author.name = `${displayUsername(perp)} ${member && member.nick ? `(${member.nick})` : ''}`
+        channelDeleteEvent.embeds[0].author.icon_url = perp.avatarURL
+        channelDeleteEvent.embeds[0].fields[3].value = `\`\`\`ini\nUser = ${perp.id}\nChannel = ${channel.id}\`\`\``
       }
       await send(channelDeleteEvent)
     } else {

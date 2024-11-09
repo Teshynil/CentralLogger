@@ -4,8 +4,9 @@
   "description": "Logger version 3, serving over 180,000 Discord servers",
   "main": "index.js",
   "scripts": {
-    "test": "standard",
-    "lint": "node_modules/.bin/eslint . --ext .js"
+    "lint": "node_modules/.bin/eslint . --ext .js",
+    "genDB": "node src/miscellaneous/generateDB",
+    "test": "standard"
   },
   "keywords": [
     "logging",

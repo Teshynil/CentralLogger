@@ -1,7 +1,7 @@
 const Eris = require('eris')
 const { clearEventByID, setAllEventsOneId } = require('../../db/interfaces/postgres/update')
 const { EMBED_COLORS } = require('../utils/constants.js')
-const { getAuthorField, getEmbedFooter } = require('../utils/embeds.js')
+const { buildEmbedAuthorField, buildEmbedFooterField } = require('../utils/embeds.js')
 
 module.exports = {
   name: 'stoplogging',
@@ -21,8 +21,8 @@ module.exports = {
             url: interaction.member.user.dynamicAvatarURL(null, 64)
           },
           color: EMBED_COLORS.GREEN,
-          author: getAuthorField(interaction.member.user),
-          footer: getEmbedFooter(global.bot.user)
+          author: buildEmbedAuthorField(interaction.member.user),
+          footer: buildEmbedFooterField(global.bot.user)
         }],
         flags: Eris.Constants.MessageFlags.EPHEMERAL
       }).catch(() => {})
@@ -37,8 +37,8 @@ module.exports = {
               url: interaction.member.user.dynamicAvatarURL(null, 64)
             },
             color: EMBED_COLORS.YELLOW_ORANGE,
-            author: getAuthorField(interaction.member.user),
-            footer: getEmbedFooter(global.bot.user)
+            author: buildEmbedAuthorField(interaction.member.user),
+            footer: buildEmbedFooterField(global.bot.user)
           }],
           flags: Eris.Constants.MessageFlags.EPHEMERAL
         }).catch(() => {})
@@ -56,8 +56,8 @@ module.exports = {
             value: eventsLoggingHere.join(', ')
           }],
           color: EMBED_COLORS.GREEN,
-          author: getAuthorField(interaction.member.user),
-          footer: getEmbedFooter(global.bot.user)
+          author: buildEmbedAuthorField(interaction.member.user),
+          footer: buildEmbedFooterField(global.bot.user)
         }],
         flags: Eris.Constants.MessageFlags.EPHEMERAL
       }).catch(() => {})

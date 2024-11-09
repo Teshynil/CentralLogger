@@ -1,6 +1,6 @@
 const { ignoreChannel, clearIgnoredChannels } = require('../../db/interfaces/postgres/update')
 const { EMBED_COLORS } = require('../utils/constants.js')
-const { getAuthorField, getEmbedFooter } = require('../utils/embeds.js')
+const { buildEmbedAuthorField, buildEmbedFooterField } = require('../utils/embeds.js')
 
 module.exports = {
   name: 'ignorechannel',
@@ -17,8 +17,8 @@ module.exports = {
           description: global.bot.guildSettingsCache[interaction.guildID].ignoredChannels.map(id => {
             return `<#${id}> (${id})`
           }).join('\n') || 'No channels are explicitly ignored!',
-          author: getAuthorField(interaction.member.user),
-          footer: getEmbedFooter(global.bot.user)
+          author: buildEmbedAuthorField(interaction.member.user),
+          footer: buildEmbedFooterField(global.bot.user)
         }]
       }).catch(global.logger.error)
     } else if (resetIgnoredChannelsOption) {
@@ -28,8 +28,8 @@ module.exports = {
           title: 'Ignored Channels',
           description: 'I am not ignoring any channels anymore (reset successful)',
           color: EMBED_COLORS.GREEN,
-          author: getAuthorField(interaction.member.user),
-          footer: getEmbedFooter(global.bot.user)
+          author: buildEmbedAuthorField(interaction.member.user),
+          footer: buildEmbedFooterField(global.bot.user)
         }]
       }).catch(() => {})
     } else {

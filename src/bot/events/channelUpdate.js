@@ -1,6 +1,8 @@
 const { Permission } = require('eris')
-const send = require('../modules/webhooksender')
 const escape = require('markdown-escape')
+const send = require('../modules/webhooksender')
+const { displayUsername } = require('../utils/constants')
+
 const CHANNEL_TYPE_MAP = {
   0: 'Text channel',
   2: 'Voice channel',
@@ -65,8 +67,8 @@ module.exports = {
     if (!logs) return
     const log = logs.entries.find(e => e.targetID === channel.id)
     if (!log) return // there should always be an audit log
-    const user = log?.user
-    if (user?.bot && !global.bot.guildSettingsCache[channel.guild.id].isLogBots()) return
+    const perp = log?.user
+    if (perp?.bot && !global.bot.guildSettingsCache[channel.guild.id].isLogBots()) return
     if (auditLogId === 11) {
       const toIter = Object.keys(log.before).length >= Object.keys(log.after).length ? log.before : log.after
       for (const changedKey in toIter) {
@@ -171,15 +173,15 @@ module.exports = {
             }
             if (newOverwrite.json.hasOwnProperty(perm) && oldOverwrite.json.hasOwnProperty(perm)) {
               if (newOverwrite.json[perm] === true && oldOverwrite.json[perm] === false) {
-                fields[counter].value += `\n${canUseExternal(channel.guild) ? '<:onswitch:827651433750855710>' : 'ALLOW'} ${perm}`
+                fields[counter].value += `\n${canUseExternal(channel.guild) ? '<:onswitch:1223589267398328402>' : 'ALLOW'} ${perm}`
               } else if (newOverwrite.json[perm] === false && oldOverwrite.json[perm] === true) {
-                fields[counter].value += `\n${canUseExternal(channel.guild) ? '<:offswitch:827651237293981736>' : 'DENY'} ${perm}`
+                fields[counter].value += `\n${canUseExternal(channel.guild) ? '<:offswitch:1223589245827154082>' : 'DENY'} ${perm}`
               }
             } else if (newOverwrite.json.hasOwnProperty(perm) && !oldOverwrite.json.hasOwnProperty(perm)) {
               if (newOverwrite.json[perm]) {
-                fields[counter].value += `\n${canUseExternal(channel.guild) ? '<:onswitch:827651433750855710>' : 'ALLOW'} ${perm}`
+                fields[counter].value += `\n${canUseExternal(channel.guild) ? '<:onswitch:1223589267398328402>' : 'ALLOW'} ${perm}`
               } else {
-                fields[counter].value += `\n${canUseExternal(channel.guild) ? '<:offswitch:827651237293981736>' : 'DENY'} ${perm}`
+                fields[counter].value += `\n${canUseExternal(channel.guild) ? '<:offswitch:1223589245827154082>' : 'DENY'} ${perm}`
               }
             } else if (!newOverwrite.json.hasOwnProperty(perm) && oldOverwrite.json.hasOwnProperty(perm)) {
               fields[counter].value += `\n⚖️ neutral/inherit ${perm}`
@@ -201,13 +203,16 @@ module.exports = {
       return
     }
 
-    if (log && user) {
-      channelUpdateEvent.embeds[0].author.name = `${user.username}#${user.discriminator}`
-      channelUpdateEvent.embeds[0].author.icon_url = user.avatarURL
+    if (log && perp) {
+      const member = channel.guild.members.get(perp.id)
+      console.log({member})
+      channelUpdateEvent.embeds[0].author.name = `${displayUsername(perp)} ${member && member.nick ? `(${member.nick})` : ''}`
+      channelUpdateEvent.embeds[0].author.icon_url = perp.avatarURL
+
       if (channel.type === 13) {
         channelUpdateEvent.embeds[0].description = `Stage Channel **${channel.name}** was ${channel.topic === null ? 'closed' : 'opened'}`
       }
-      channelUpdateEvent.embeds[0].fields.push({ name: 'ID', value: `\`\`\`ini\nUser = ${user.id}\nChannel = ${channel.id}\`\`\`` })
+      channelUpdateEvent.embeds[0].fields.push({ name: 'ID', value: `\`\`\`ini\nUser = ${perp.id}\nChannel = ${channel.id}\`\`\`` })
       await send(channelUpdateEvent)
     } else {
       channelUpdateEvent.embeds[0].fields.push({
